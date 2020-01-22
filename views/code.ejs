@@ -33,7 +33,7 @@
           Access Token Error
         </h1>
         <p>
-          There was an error generating the token:
+          There was an error generating the authorization code:
         </p>
         <pre>
 {
@@ -53,8 +53,8 @@
       </p>
       <pre><span id="fullResult"></span></pre>
       <p>
-        Besides using your access code, you can use the received refresh token to generate a new token.<br/>
-        This is only necessary when the access_code expires, so this is intended to be an example of use.<br/>
+        Besides using your access token, you can use the received refresh token to generate a new token.<br/>
+        This is only necessary when the access_token expires, so this is intended to be an example of use.<br/>
         To do this press the button bellow.
       </p>
       <button id="refreshToken" class="pure-button pure-button-primary" type="button">Refresh Token</button>
@@ -76,7 +76,9 @@
 
       if (access_token) {
         $("#authCode").hide()
+        $("#accessTokenErrorDiv").hide()
         $("#accessTokenDiv").show()
+
         $("#fullResult").text(JSON.stringify(result, undefined, 4))
         $("#refresh").val(result.refresh_token)
         $("#access").val(access_token)
@@ -87,7 +89,8 @@
         $("#authCode").hide()
         $("#accessTokenDiv").hide()
         $("#accessTokenErrorDiv").show()
-        $("#errorFullResult").append(JSON.stringify(error, undefined, 4))
+
+        $("#errorFullResult").text(JSON.stringify(error, undefined, 4))
       }
     }
 

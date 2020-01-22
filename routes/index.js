@@ -5,14 +5,17 @@ const SimpleOAuth2 = require('simple-oauth2')
 const router = express.Router()
 
 const credentials = {
-  client: {
-    id: process.env.CLIENT_ID,
-    secret: process.env.CLIENT_SECRET
-  },
   auth: {
     authorizePath: '/oauth2/authorize',
     tokenHost: process.env.GATEKEEPER_URL,
     tokenPath: '/oauth2/token'
+  },
+  client: {
+    id: process.env.CLIENT_ID,
+    secret: process.env.CLIENT_SECRET
+  },
+  http: {
+    json: 'force'
   }
 }
 
@@ -53,10 +56,8 @@ router.post('/login', async (req, res, next) => {
     res.status(accessToken && accessToken.token && accessToken.token.error ? 400 : 200)
     res.json(accessToken.token)
   } catch (error) {
-    console.log('Access Token Error', error.message)
-
     res.status(400)
-    res.json({ error: error.message })
+    res.json(error.data.payload)
   }
 })
 
@@ -77,10 +78,8 @@ router.post('/refresh', async (req, res, next) => {
     res.status(accessToken && accessToken.token && accessToken.token.error ? 400 : 200)
     res.json(accessToken.token)
   } catch (error) {
-    console.log('Access Token Error', error.message)
-
     res.status(400)
-    res.json({ error: error.message })
+    res.json(error.data.payload)
   }
 })
 
