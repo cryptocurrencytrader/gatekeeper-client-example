@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gatekeeper Client Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+  </head>
+  <body>
+    <input type="hidden" id="refresh"/>
+    <input type="hidden" id="access"/>
+    <input type="hidden" id="expires"/>
+    <input type="hidden" id="scope"/>
+    <% if (code) { %>
+      <div id="authCode">
+        <h1>
+          Authorization Code
+        </h1>
+        <p>
+          Look at your URL and you will see that you have a authorization code:
+        </p>
+        <pre><%= code %></pre>
+        <p>
+          This isn't your access token, but you can exchange it for an access token by clicking the button bellow.
+        </p>
+        <p>
+          <button id="submit" class="pure-button pure-button-primary" type="button">Submit Post</button>
+        </p>
+      </div>
+    <% } else { %>
+      <div>
+        <h1>
+          Access Token Error
+        </h1>
+        <p>
+          There was an error generating the token:
+        </p>
+        <pre>
+{
+  error: <%= error %>,
+  error_description: <%= error_description %>
+}
+        </pre>
+      </div>
+    <% } %>
+    <div id="accessTokenDiv" style="display: none">
+      <h1>
+        Access Token
+      </h1>
+      <p>
+        Underneath your browser's network tab you will see the following response
+        with your access token, refresh token, expiration time, and token type:
+      </p>
+      <pre><span id="fullResult"></span></pre>
+      <p>
+        Besides using your access code, you can use the received refresh token to generate a new token.<br/>
+        This is only necessary when the access_code expires, so this is intended to be an example of use.<br/>
+        To do this press the button bellow.
+      </p>
+      <button id="refreshToken" class="pure-button pure-button-primary" type="button">Refresh Token</button>
+    </div>
+    <div id="accessTokenErrorDiv" style="display: none">
+      <h1>
+        Access Token Error
+      </h1>
+      <p>
+        There was an error generating the token:
+      </p>
+      <pre><span id="errorFullResult"></span></pre>
+    </div>
+  </body>
+  <script type="text/javascript" src="../javascripts/jquery.min.js"></script>
+  <script type="text/javascript">
+    var result = function (result) {
+      var access_token = result.access_token
+
+      if (access_token) {
+        $("#authCode").hide()
+        $("#accessTokenDiv").show()
+        $("#fullResult").text(JSON.stringify(result, undefined, 4))
+        $("#refresh").val(result.refresh_token)
+        $("#access").val(access_token)
+        $("#expires").val(result.expires_in)
+        $("#scope").val(result.scope)
+      } else {
+        var error = JSON.parse(result.responseText)
+        $("#authCode").hide()
+        $("#accessTokenDiv").hide()
+        $("#accessTokenErrorDiv").show()
+        $("#errorFullResult").append(JSON.stringify(error, undefined, 4))
+      }
+    }
+
+    $("#submit").click(function (event) {
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: '/login',
+        data: 'code=<%= code %>',
+        success: result,
+        error: result
+      })
+    })
+
+    $("#refreshToken").click(function (event) {
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: '/refresh',
+        data: 'refresh_token=' + $("#refresh").val() +
+          '&access_token=' + $("#access").val() +
+          '&expires_in=' + $("#expires").val() +
+          '&scope=' + $("#scope").val(),
+        success: result,
+        error: result
+      })
+    })
+  </script>
+</html>
